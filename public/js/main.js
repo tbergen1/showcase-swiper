@@ -82,6 +82,8 @@ App.initializeDashboard = function() {
         App.slider = $('#products-container');
         App.slider.slick();
         //Monitor swipe position and add products
+        App.oldIndex = 0;
+        App.swipeCount = 0;
         App.swipeListen();
         // Pick first Servant as default and initialize
         return App.initializeServant(App.servants[0]._id);
@@ -180,10 +182,21 @@ App.renderProduct = function(product) {
 
 App.swipeListen = function() {
 
-    //Some eventlistener that monitors change
+    //Monitor for slide change and add products based on scenario
     App.slider.on('afterChange', function(event, slick, currentSlide) {
+        console.log(slick);
+        
+        var detectThreshold = slick.slideCount - slick.currentSlide;
+        var slideDirection = slick.currentSlide - App.oldIndex;
+        //Determine swipe direction and record position relative to origin
+        if (slideDirection > 0) App.swipeCount++;
+        else if (slideDirection < 0) App.swipeCount--;
+        //Reset position relative to origin if origin is visited
+        if (slick.currentSlide === 0) App.swipeCount = 0;        
+        //Render next page of products if criteria met
+        if (detectThreshold === 3 && slideDirection > 0 && App.swipeCount === slick.slideCount - 3)  App.loadProducts(function(){
 
-        if (slick.slideCount - slick.currentSlide === 3)  App.loadProducts(function(){
+            App.oldIndex = slick.currentSlide;
 
             for (i = 0; i < App.products.length; i++) {
                     App.renderProduct(App.products[i]);
@@ -191,6 +204,7 @@ App.swipeListen = function() {
 
         });
 
+        else App.oldIndex = slick.currentSlide;
     });
 };
 
