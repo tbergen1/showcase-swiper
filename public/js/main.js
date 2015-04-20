@@ -24,6 +24,7 @@ $(document).ready(function() {
 
     // If access tokens in the current url, save & remove them
     App.access_tokens = Servant.fetchAccessTokens();
+
     // If app has access tokens start the dashboard view, else intialize the home page view
     if (App.access_tokens) return App.initializeDashboard();
     else return App.initializeHomePage();
@@ -38,6 +39,7 @@ $(document).ready(function() {
  */
 
 App.initializeHomePage = function() {
+
     // Show connect button
     $('#connect-button-container').show();
 };
@@ -59,6 +61,7 @@ App.initializeDashboard = function() {
 
         // If error, stop everything and log it
         if (error) return console.log(error);
+
         // If user has no servants in their Servant account, stop everything and alert them.
         if (!response.servants.length) return alert('You must have at least one servant with data on it to use this application');
 
@@ -68,23 +71,30 @@ App.initializeDashboard = function() {
 
         // Show the select field, allowing people to change servant.
         $('#servant-select-container').show();
+
         // Populate the Servant Select field with each Servant
         for (i = 0; i < App.servants.length; i++) {
             $('#servant-select').append('<option value="' + App.servants[i]._id + '">' + App.servants[i].master + '</option>');
         };
+
         // Set listener on the select field to change servant in application and reload products
         $('#servant-select').change(function() {
             return App.initializeServant($("#servant-select option:selected").val());
         });
+
         // Show products container
         $('#products-container').show();
+
         // Init Slick.js
         App.slider = $('#products-container');
         App.slider.slick();
+
         //Monitor swipe position and add products
         App.oldIndex = 0;
         App.swipeCount = 0;
+        App.recordsEnd = 1;
         App.swipeListen();
+
         // Pick first Servant as default and initialize
         return App.initializeServant(App.servants[0]._id);
     });
@@ -102,21 +112,27 @@ App.initializeDashboard = function() {
 App.initializeServant = function(servantID) {
     // Change greeting to "loading" while we change servants
     $('#greeting').text('Loading...');
+
     // Find servant with this ID and set it as the App's default servant
     for (i = 0; i < App.servants.length; i++) {
         if (App.servants[i]._id === servantID) App.servant = App.servants[i];
     }
+
     // Clear products from screen, we're going to reload them from the new servant...
     App.slider.slick('slickRemove', null, null, true);
+
     // Set query criteria page back to 1
     App.criteria.page = 1;
+
     // Reload products
     App.loadProducts(function() {
+
         // Do something depending on whether the new servant holds any product records
         if (!App.products.length) {
             $('#greeting').text('Whoops, you have no products on this Servant.  Go make some in the Servant dashboard!');
         } else {
             $('#greeting').text('Here is a simple example of showing a product on this servant...');
+            
             // Render multiple products
             for (i = 0; i < App.products.length; i++) {
                 App.renderProduct(App.products[i]);
@@ -145,7 +161,8 @@ App.loadProducts = function(callback) {
 
         // Save data to global app variable
         App.products = response.records;
-        console.log(response);
+        App.totalProducts = response.meta.count;
+        
         // Increment page number in our query criteria.  Next time we call the function, the next page will be fetched.
         App.criteria.page++;
 
@@ -154,7 +171,6 @@ App.loadProducts = function(callback) {
 
     });
 };
-
 
 /**
  * Render Contact
@@ -184,19 +200,26 @@ App.swipeListen = function() {
 
     //Monitor for slide change and add products based on scenario
     App.slider.on('afterChange', function(event, slick, currentSlide) {
-        console.log(slick);
         
         var detectThreshold = slick.slideCount - slick.currentSlide;
         var slideDirection = slick.currentSlide - App.oldIndex;
+        var numPages = Math.ceil(App.totalProducts/10);
+        
         //Determine swipe direction and record position relative to origin
         if (slideDirection > 0) App.swipeCount++;
         else if (slideDirection < 0) App.swipeCount--;
+
         //Reset position relative to origin if origin is visited
         if (slick.currentSlide === 0) App.swipeCount = 0;        
+        
+        //Stop additional product requests when page limit exceeded
+        if (App.recordsEnd > numPages-1) return false;
+
         //Render next page of products if criteria met
         if (detectThreshold === 3 && slideDirection > 0 && App.swipeCount === slick.slideCount - 3)  App.loadProducts(function(){
 
             App.oldIndex = slick.currentSlide;
+            App.recordsEnd++;
 
             for (i = 0; i < App.products.length; i++) {
                     App.renderProduct(App.products[i]);
@@ -209,4 +232,3 @@ App.swipeListen = function() {
 };
 
 // End
-
