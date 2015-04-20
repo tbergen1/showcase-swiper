@@ -1,0 +1,46 @@
+{
+    "name": "servant-boilerplate-frontend",
+    "version": "0.0.1",
+    "description": "A simple front-end application boilerplate for making a website that integrates with Servant - https://www.servant.co",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/servant-app/servant-boilerplate-front-end.git"
+    },
+    "author": "Sandro Padin",
+    "contributors": [
+        "Luca Capra"
+    ],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/servant-app/servant-boilerplate-front-end/issues"
+    },
+    "homepage": "https://github.com/servant-app/servant-boilerplate-front-end",
+    "dependencies": {
+        "body-parser": "^1.1.2",
+        "ejs": "^2.3.1",
+        "errorhandler": "^1.0.1",
+        "express": "^4.1.2",
+        "method-override": "^1.0.0"
+    },
+    "bin": {
+        "servant-boilerplate-frontend": "./start.js"
+    },
+    "devDependencies": {
+        "bower": "^1.4.1",
+        "dotenv": "^1.1.0",
+        "gulp": "^3.8.11",
+        "gulp-bump": "^0.3.0",
+        "gulp-concat": "^2.5.2",
+        "gulp-develop-server": "^0.4.2",
+        "gulp-filter": "^2.0.2",
+        "gulp-git": "^1.1.1",
+        "gulp-rename": "^1.2.2",
+        "gulp-shell": "^0.4.0",
+        "gulp-tag-version": "^1.2.1",
+        "gulp-uglify": "^1.2.0"
+    }
+}
