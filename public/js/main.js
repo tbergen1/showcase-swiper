@@ -81,8 +81,8 @@ App.initializeDashboard = function() {
         // Init Slick.js
         App.slider = $('#products-container');
         App.slider.slick();
-
-        App.swipeTest();
+        //Monitor swipe position and add products
+        App.swipeListen();
         // Pick first Servant as default and initialize
         return App.initializeServant(App.servants[0]._id);
     });
@@ -173,38 +173,25 @@ App.renderProduct = function(product) {
 
 };
 
+/**
+* Add More Products
+* - Determines distance from end of carousel and adds more products
+*/
 
-
-
-
-/*App.swipeListen = function() {
+App.swipeListen = function() {
 
     //Some eventlistener that monitors change
-    App.slider.on('swipe', function() {
+    App.slider.on('afterChange', function(event, slick, currentSlide) {
 
-    var currentSlide = App.slider.slick('slickCurrentSlide');
-    console.log(currentSlide);
+        if (slick.slideCount - slick.currentSlide === 3)  App.loadProducts(function(){
 
-    if (App.products.length - currentSlide === 3) App.loadProducts(function(){
+            for (i = 0; i < App.products.length; i++) {
+                    App.renderProduct(App.products[i]);
+            }
 
-        console.log("Adding new products!");
-
-        for (i = 0; i < App.products.length; i++) {
-                App.renderProduct(App.products[i]);
-        }
+        });
 
     });
-
-    });
-};*/
-
-App.swipeTest = function() {
-
-App.slider.on('swipe', function(event, slick, direction) {
-            console.log(event);
-            console.log(slick);
-            console.log(direction);
-});
 };
 
 // End
