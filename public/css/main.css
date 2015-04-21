@@ -123,6 +123,15 @@ textarea {
     font-size:13px;
 }
 
+#category-select-container {
+    position: absolute;
+    top: 75px;
+    left: 0px;
+    right: 0px;
+    margin: 0px auto;
+    width: 200px;
+}
+
 #greeting {
     margin-top: 125px;
     font-size: 20px;

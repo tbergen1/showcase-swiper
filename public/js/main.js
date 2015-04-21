@@ -79,6 +79,18 @@ App.initializeDashboard = function() {
 
         // Set listener on the select field to change servant in application and reload products
         $('#servant-select').change(function() {
+            App.criteria.query = {};
+            return App.initializeServant($("#servant-select option:selected").val());
+        });
+
+        //Show category input field, allowing people to search for products with a specific category tag
+        $('#category-select-container').show();
+
+        //Listen for query submission
+        $('#category-submit').click(function(){
+            if ($('[name=category]').val() == '') return App.criteria.query = {};
+            App.criteria.query.$text = {}; 
+            App.criteria.query.$text.$search = $('[name=category]').val();
             return App.initializeServant($("#servant-select option:selected").val());
         });
 
@@ -132,7 +144,7 @@ App.initializeServant = function(servantID) {
             $('#greeting').text('Whoops, you have no products on this Servant.  Go make some in the Servant dashboard!');
         } else {
             $('#greeting').text('Here is a simple example of showing a product on this servant...');
-            
+
             // Render multiple products
             for (i = 0; i < App.products.length; i++) {
                 App.renderProduct(App.products[i]);
@@ -162,7 +174,7 @@ App.loadProducts = function(callback) {
         // Save data to global app variable
         App.products = response.records;
         App.totalProducts = response.meta.count;
-        
+        console.log(response);
         // Increment page number in our query criteria.  Next time we call the function, the next page will be fetched.
         App.criteria.page++;
 
