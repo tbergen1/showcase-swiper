@@ -86,13 +86,23 @@ App.initializeDashboard = function() {
         //Show category input field, allowing people to search for products with a specific category tag
         $('#category-select-container').show();
 
+        //Show search results list
+        $('#search-select-container').show();
+
         //Listen for query submission
-        $('#category-submit').click(function(){
-            if ($('[name=category]').val() == '') return App.criteria.query = {};
-            App.criteria.query.$text = {}; 
-            App.criteria.query.$text.$search = $('[name=category]').val();
+        $('#category-submit').click(function() {
+            if ($('[name=category]').val() == '') App.criteria.query = {};
+            else {
+                App.criteria.query.$text = {}; 
+                App.criteria.query.$text.$search = $('[name=category]').val();
+                console.log(App.criteria.query);
+            }
             return App.initializeServant($("#servant-select option:selected").val());
         });
+
+        //Listen for key-up event in search field
+        App.test = 0;
+        App.searchSuggest();
 
         // Show products container
         $('#products-container').show();
@@ -149,6 +159,7 @@ App.initializeServant = function(servantID) {
             for (i = 0; i < App.products.length; i++) {
                 App.renderProduct(App.products[i]);
             }
+            
         }
     }); 
 };
@@ -243,4 +254,41 @@ App.swipeListen = function() {
     });
 };
 
+App.searchSuggest = function() {
+
+    var timeout = null;
+
+    $('[name=category]').keyup(function() {
+
+        if (timeout !== null) clearTimeout(timeout);
+
+        timeout = setTimeout(function () {
+        console.log(App.test++);
+        App.criteria.query.$text = {}; 
+        App.criteria.query.$text.$search = $('[name=category]').val();
+        App.initializeServant($("#servant-select option:selected").val());
+        console.log(App.products);
+
+        }, 1000);
+        for (i = 0; i < App.products.length; i++) {
+            $('#search-select').append('<option value="' + App.products[i]._id + '">' + App.products[i].name + '</option>');
+        };
+        
+    });
+};
+
 // End
+
+
+/*$( "#target" ).keyup(function() {
+ 
+         // Show searching text to let user know searching is     happening automatically when they type
+
+         if (search_timer) clearTimeout(search_timer);
+
+         var search_timer = setTimeout(function() {
+                // Execute search in here
+               }, 500);
+
+
+       });*/
