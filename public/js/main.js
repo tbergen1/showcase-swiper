@@ -7,6 +7,14 @@ if (!window.App) window.App = App = {
         query: {},
         sort: {},
         page: 1
+    },
+    timer: {
+        timeout: null
+    },
+    swipe: {
+        oldIndex: 0,
+        swipeCount: 0,
+        recordsEnd: 1
     }
 };
 
@@ -26,8 +34,8 @@ $(document).ready(function() {
     App.access_tokens = Servant.fetchAccessTokens();
 
     // If app has access tokens start the dashboard view, else intialize the home page view
-    if (App.access_tokens) return App.initializeDashboard();
-    else return App.initializeHomePage();
+    if (App.access_tokens) return App._initializeDashboard();
+    else return App._initializeHomePage();
 
 });
 
@@ -38,7 +46,7 @@ $(document).ready(function() {
  * - Start home page animations and more here
  */
 
-App.initializeHomePage = function() {
+App._initializeHomePage = function() {
 
     // Show connect button
     $('#connect-button-container').show();
@@ -51,7 +59,7 @@ App.initializeHomePage = function() {
  * - This simple example shows one of their products on each servant
  */
 
-App.initializeDashboard = function() {
+App._initializeDashboard = function() {
 
     // Change greeting to "loading" while we fetch some data from Servant
     $('#greeting').text('Loading...');
@@ -80,29 +88,26 @@ App.initializeDashboard = function() {
         // Set listener on the select field to change servant in application and reload products
         $('#servant-select').change(function() {
             App.criteria.query = {};
-            return App.initializeServant($("#servant-select option:selected").val());
+            return App._initializeServant($("#servant-select option:selected").val());
         });
 
         //Show category input field, allowing people to search for products with a specific category tag
-        $('#category-select-container').show();
-
-        //Show search results list
-        $('#search-select-container').show();
-
-        //Listen for query submission
-        $('#category-submit').click(function() {
-            if ($('[name=category]').val() == '') App.criteria.query = {};
-            else {
-                App.criteria.query.$text = {}; 
-                App.criteria.query.$text.$search = $('[name=category]').val();
-                console.log(App.criteria.query);
-            }
-            return App.initializeServant($("#servant-select option:selected").val());
-        });
+        $('#category-select-container, #search-select-container').show();
 
         //Listen for key-up event in search field
-        App.test = 0;
-        App.searchSuggest();
+        $('[name=category]').keyup(function() {
+
+            if (App.timer.timeout !== null) clearTimeout(App.timer.timeout);
+
+            App.timer.timeout = setTimeout(function() {
+                App._search($('[name=category]').val())
+            }, 1000);
+        });
+
+        //Change slide position based on search result selection
+        $("#search-select").change(function(){
+            App.slider.slick('slickGoTo', $("#search-select option:selected").val());
+        });
 
         // Show products container
         $('#products-container').show();
@@ -112,13 +117,12 @@ App.initializeDashboard = function() {
         App.slider.slick();
 
         //Monitor swipe position and add products
-        App.oldIndex = 0;
-        App.swipeCount = 0;
-        App.recordsEnd = 1;
-        App.swipeListen();
+        App.slider.on('afterChange', function(event, slick, currentSlide) {
+            App._extendProducts(slick, currentSlide);
+        });
 
         // Pick first Servant as default and initialize
-        return App.initializeServant(App.servants[0]._id);
+        return App._initializeServant(App.servants[0]._id);
     });
 };
 
@@ -131,7 +135,7 @@ App.initializeDashboard = function() {
  * - Reloads products from the new servant and renders one
  */
 
-App.initializeServant = function(servantID) {
+App._initializeServant = function(servantID) {
     // Change greeting to "loading" while we change servants
     $('#greeting').text('Loading...');
 
@@ -147,7 +151,7 @@ App.initializeServant = function(servantID) {
     App.criteria.page = 1;
 
     // Reload products
-    App.loadProducts(function() {
+    App._loadProducts(function() {
 
         // Do something depending on whether the new servant holds any product records
         if (!App.products.length) {
@@ -157,7 +161,7 @@ App.initializeServant = function(servantID) {
 
             // Render multiple products
             for (i = 0; i < App.products.length; i++) {
-                App.renderProduct(App.products[i]);
+                App._renderProduct(App.products[i]);
             }
             
         }
@@ -174,7 +178,7 @@ App.initializeServant = function(servantID) {
  * - Can easily be hooked up to a scroll listener to make infinite scrolling
  */
 
-App.loadProducts = function(callback) {
+App._loadProducts = function(callback) {
 
     // Fetch products
     Servant.queryArchetypes(App.access_tokens.access_token, App.servant._id, 'product', App.criteria, function(error, response) {
@@ -200,7 +204,7 @@ App.loadProducts = function(callback) {
  * - Renders some html showing a single contact
  */
 
-App.renderProduct = function(product) {
+App._renderProduct = function(product) {
 
     // Create a string of the contact's html
     var html = '<div class="product">';
@@ -219,61 +223,53 @@ App.renderProduct = function(product) {
 * - Determines distance from end of carousel and adds more products
 */
 
-App.swipeListen = function() {
-
-    //Monitor for slide change and add products based on scenario
-    App.slider.on('afterChange', function(event, slick, currentSlide) {
+App._extendProducts = function(slick, currentSlide) {
         
         var detectThreshold = slick.slideCount - slick.currentSlide;
-        var slideDirection = slick.currentSlide - App.oldIndex;
+        var slideDirection = slick.currentSlide - App.swipe.oldIndex;
         var numPages = Math.ceil(App.totalProducts/10);
         
         //Determine swipe direction and record position relative to origin
-        if (slideDirection > 0) App.swipeCount++;
-        else if (slideDirection < 0) App.swipeCount--;
+        if (slideDirection > 0) App.swipe.swipeCount++;
+        else if (slideDirection < 0) App.swipe.swipeCount--;
 
         //Reset position relative to origin if origin is visited
-        if (slick.currentSlide === 0) App.swipeCount = 0;        
+        if (slick.currentSlide === 0) App.swipe.swipeCount = 0;        
         
         //Stop additional product requests when page limit exceeded
-        if (App.recordsEnd > numPages-1) return false;
+        if (App.swipe.recordsEnd > numPages-1) return false;
 
         //Render next page of products if criteria met
-        if (detectThreshold === 3 && slideDirection > 0 && App.swipeCount === slick.slideCount - 3)  App.loadProducts(function(){
+        if (detectThreshold === 3 && slideDirection > 0 && App.swipe.swipeCount === slick.slideCount - 3)  App._loadProducts(function(){
 
-            App.oldIndex = slick.currentSlide;
-            App.recordsEnd++;
+            App.swipe.oldIndex = slick.currentSlide;
+            App.swipe.recordsEnd++;
 
             for (i = 0; i < App.products.length; i++) {
-                    App.renderProduct(App.products[i]);
+                App._renderProduct(App.products[i]);
             }
 
         });
 
-        else App.oldIndex = slick.currentSlide;
-    });
+        else App.swipe.oldIndex = slick.currentSlide;
 };
 
-App.searchSuggest = function() {
+App._search = function(searchParam) {
+  
+    App.criteria.query.$text = {$search: searchParam}; 
+    
+    // Clear products from screen, we're going to reload them from the new servant...
+    App.slider.slick('slickRemove', null, null, true);
+    
+    // Set query criteria page back to 1
+    App.criteria.page = 1;
 
-    var timeout = null;
-
-    $('[name=category]').keyup(function() {
-
-        if (timeout !== null) clearTimeout(timeout);
-
-        timeout = setTimeout(function () {
-        console.log(App.test++);
-        App.criteria.query.$text = {}; 
-        App.criteria.query.$text.$search = $('[name=category]').val();
-        App.initializeServant($("#servant-select option:selected").val());
-        console.log(App.products);
-
-        }, 1000);
+    App._loadProducts(function(){
         for (i = 0; i < App.products.length; i++) {
-            $('#search-select').append('<option value="' + App.products[i]._id + '">' + App.products[i].name + '</option>');
-        };
-        
+            $('#search-select').append('<option value="' + i + '">' + App.products[i].name + '</option>');
+            $('#search-results').append('<li id="result' + i + '">' + App.products[i].name + '</li>');
+            App._renderProduct(App.products[i]);
+        } 
     });
 };
 
@@ -292,3 +288,4 @@ App.searchSuggest = function() {
 
 
        });*/
+
