@@ -199,6 +199,49 @@ textarea {
 ul li {
     display:block;
 }
+#next-product {
+    position: absolute;
+    margin: -425px 0px 100px 600px;
+}
+#prev-product {
+    position: absolute;
+    margin: -425px 0px 100px -70px;
+}
+
+/* ==========================================================================
+   bigSlide Styles
+   ========================================================================== */
+.panel {
+  background: #2C3E50;
+  z-index: 9999;
+  position: fixed;
+  left: -15.625em; /*or width of your navigation panel*/
+  width: 15.625em; /*should match the above value*/
+}
+
+.panel ul {
+  border-top: 2px solid #34495D;
+}
+
+.panel a {
+  display: block;
+  border-bottom: 2px solid #34495D;
+  padding: 1em;
+}
+
+.panel a:link,
+.panel a:visited {
+  color: #fff;
+}
+
+.panel a:hover,
+.panel a:active {
+  background: #25B89A;
+}
+
+.nav-icon {
+  margin-right: 6px;
+}
 /* ==========================================================================
    Helper classes
    ========================================================================== */

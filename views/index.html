@@ -26,11 +26,22 @@
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-    
+    <div id="menu" class="panel" role="navigation">
+        <ul>
+            <li><a href="https://github.com/ascott1/bigSlide.js"><span class="icon-github nav-icon"></span>Github</a></li>
+            <li><a href="https://raw.github.com/ascott1/bigSlide.js/master/dist/bigSlide.min.js"><span></span>Compressed </a></li>
+            <li><a href="https://raw.github.com/ascott1/bigSlide.js/master/dist/bigSlide.js"><span class="icon-download nav-icon"></span>Uncompressed</a></li>
+            <li><a href="#how"><span class="icon-book nav-icon"></span>How to</a></li>
+            <li><a href="#options"><span class="icon-cog nav-icon"></span>Options</a></li>
+        </ul>
+    </div>
 
 
     <!-- Begin Site Content -->
+    <div class="masthead">
+        <div class="wrap push">
 
+            <a href="#menu" class="menu-link">&#9776;</a>
 
     <!-- Servant Select-->
     <div id="servant-select-container" style="display:none;">
@@ -42,7 +53,7 @@
     <div id="category-select-container" style="display:none;">
         <form>
         Enter A Category:<br>
-        <input type="text" name="category">
+        <input id="search-box" name="category" type="text" placeholder="Search">
         </form>
     </div>
 
@@ -64,8 +75,13 @@
         <select id="search-select" class="st-input"></select>
     </div>
 
-    <ul id="search-results"></ul>
+    <!--<ul id="search-results"></ul>-->
 
+    <button id="next-product">Next</button>
+    <button id="prev-product">Prev</button>
+
+    <button id="clear-search">Clear Search</button>
+    <button class="menu-link">Slide</button>
 
 <!--<div id="page-container"> -->
 
@@ -77,8 +93,8 @@
     </div>
 </div> -->
     <!-- End Site Content -->
-
-
+</div>
+</div>
 
 
 
@@ -89,6 +105,7 @@
         <script type="text/javascript" src="libs/jquery/dist/jquery.min.js"></script>
         <script type="text/javascript" src="libs/servant-sdk-javascript/dist/servant_sdk_js.min.js"></script>
         <script type="text/javascript" src="libs/slick.js/slick/slick.min.js"></script>
+        <script type="text/javascript" src= "libs/big-slide.js"></script>
         <script src="js/plugins.js"></script>
         <script src="js/main.js"></script>
     <% } else { %>

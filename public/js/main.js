@@ -30,6 +30,9 @@ $(document).ready(function() {
         application_client_id: 'LDGZDSdA2tDyUGKD'
     });
 
+    //Initialize bigSlide
+    $('.menu-link').bigSlide();
+
     // If access tokens in the current url, save & remove them
     App.access_tokens = Servant.fetchAccessTokens();
 
@@ -103,10 +106,36 @@ App._initializeDashboard = function() {
                 App._search($('[name=category]').val())
             }, 1000);
         });
-
+        //$('#products-container').fadeTo('slow', 0.3);
         //Change slide position based on search result selection
         $("#search-select").change(function(){
             App.slider.slick('slickGoTo', $("#search-select option:selected").val());
+        });
+
+        //Button navigation
+        $('#next-product').mouseover(function() {
+            $(this).fadeTo('fast', 0.5);
+        }).mouseout(function() {
+            $(this).fadeTo('fast', 1);
+        });
+
+        $('#prev-product').mouseover(function() {
+            $(this).fadeTo('fast', 0.5);
+        }).mouseout(function() {
+            $(this).fadeTo('fast', 1);
+        });
+
+        //Clear search
+        $('#clear-search').click(function() {
+            $('[name=category]').val("");
+            App.criteria.query = {};
+            App.criteria.page = 1;
+            App.slider.slick('slickRemove', null, null, true);
+            App._loadProducts(function() {
+            for (i = 0; i < App.products.length; i++) {
+                App._renderProduct(App.products[i]);
+            }
+            });
         });
 
         // Show products container
@@ -114,8 +143,11 @@ App._initializeDashboard = function() {
 
         // Init Slick.js
         App.slider = $('#products-container');
-        App.slider.slick();
-
+        App.slider.slick({
+            nextArrow: $('#next-product'),
+            prevArrow: $('#prev-product')
+        });
+            
         //Monitor swipe position and add products
         App.slider.on('afterChange', function(event, slick, currentSlide) {
             App._extendProducts(slick, currentSlide);
@@ -238,7 +270,12 @@ App._extendProducts = function(slick, currentSlide) {
         
         //Stop additional product requests when page limit exceeded
         if (App.swipe.recordsEnd > numPages-1) return false;
-
+console.log("");
+console.log("threshold", detectThreshold);
+console.log("direction", slideDirection);
+console.log("count", App.swipe.swipeCount);
+console.log("total_slides", slick.slideCount);
+console.log("recordsEnd", App.swipe.recordsEnd);
         //Render next page of products if criteria met
         if (detectThreshold === 3 && slideDirection > 0 && App.swipe.swipeCount === slick.slideCount - 3)  App._loadProducts(function(){
 
@@ -255,8 +292,9 @@ App._extendProducts = function(slick, currentSlide) {
 };
 
 App._search = function(searchParam) {
-  
-    App.criteria.query.$text = {$search: searchParam}; 
+    
+    if (searchParam == "") App.criteria.query = {};  
+    else App.criteria.query.$text = {$search: searchParam}; 
     
     // Clear products from screen, we're going to reload them from the new servant...
     App.slider.slick('slickRemove', null, null, true);
@@ -267,7 +305,7 @@ App._search = function(searchParam) {
     App._loadProducts(function(){
         for (i = 0; i < App.products.length; i++) {
             $('#search-select').append('<option value="' + i + '">' + App.products[i].name + '</option>');
-            $('#search-results').append('<li id="result' + i + '">' + App.products[i].name + '</li>');
+            //$('#search-results').append('<li id="result' + i + '">' + App.products[i].name + '</li>');
             App._renderProduct(App.products[i]);
         } 
     });
