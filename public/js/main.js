@@ -1,5 +1,5 @@
 /**
- * Defined Global App Variable
+ * Define Global App Variable
  */
 
 if (!window.App) window.App = App = {
@@ -9,7 +9,7 @@ if (!window.App) window.App = App = {
         page: 1
     },
     timer: {
-        timeout: null
+        search: null
     },
     swipe: {
         oldIndex: 0,
@@ -30,9 +30,6 @@ $(document).ready(function() {
         application_client_id: 'LDGZDSdA2tDyUGKD'
     });
 
-    //Initialize bigSlide
-    $('.menu-link').bigSlide();
-
     // If access tokens in the current url, save & remove them
     App.access_tokens = Servant.fetchAccessTokens();
 
@@ -50,9 +47,8 @@ $(document).ready(function() {
  */
 
 App._initializeHomePage = function() {
-
-    // Show connect button
-    $('#connect-button-container').show();
+    // Show landing page
+    $('#home-page').show();
 };
 
 /**
@@ -64,8 +60,11 @@ App._initializeHomePage = function() {
 
 App._initializeDashboard = function() {
 
-    // Change greeting to "loading" while we fetch some data from Servant
-    $('#greeting').text('Loading...');
+    // Show showcase page
+    $('#showcase-page').show();
+
+    //Initialize bigSlide
+    $('.menu-link').bigSlide();
 
     // Load user & their servants
     Servant.getUserAndServants(App.access_tokens.access_token, function(error, response) {
@@ -80,9 +79,6 @@ App._initializeDashboard = function() {
         App.user = response.user;
         App.servants = response.servants;
 
-        // Show the select field, allowing people to change servant.
-        $('#servant-select-container').show();
-
         // Populate the Servant Select field with each Servant
         for (i = 0; i < App.servants.length; i++) {
             $('#servant-select').append('<option value="' + App.servants[i]._id + '">' + App.servants[i].master + '</option>');
@@ -94,52 +90,29 @@ App._initializeDashboard = function() {
             return App._initializeServant($("#servant-select option:selected").val());
         });
 
-        //Show category input field, allowing people to search for products with a specific category tag
-        $('#category-select-container, #search-select-container').show();
-
         //Listen for key-up event in search field
-        $('[name=category]').keyup(function() {
+        $('#search-box').keyup(function() {
 
-            if (App.timer.timeout !== null) clearTimeout(App.timer.timeout);
+            if (App.timer.search !== null) clearTimeout(App.timer.search);
 
-            App.timer.timeout = setTimeout(function() {
-                App._search($('[name=category]').val())
-            }, 1000);
-        });
-        //$('#products-container').fadeTo('slow', 0.3);
-        //Change slide position based on search result selection
-        $("#search-select").change(function(){
-            App.slider.slick('slickGoTo', $("#search-select option:selected").val());
-        });
+            App.timer.search = setTimeout(function() {
+                App._search($('#search-box').val())
+            }, 700);
 
-        //Button navigation
-        $('#next-product').mouseover(function() {
-            $(this).fadeTo('fast', 0.5);
-        }).mouseout(function() {
-            $(this).fadeTo('fast', 1);
-        });
-
-        $('#prev-product').mouseover(function() {
-            $(this).fadeTo('fast', 0.5);
-        }).mouseout(function() {
-            $(this).fadeTo('fast', 1);
         });
 
         //Clear search
         $('#clear-search').click(function() {
-            $('[name=category]').val("");
+            $('#search-box').val("");
             App.criteria.query = {};
             App.criteria.page = 1;
             App.slider.slick('slickRemove', null, null, true);
             App._loadProducts(function() {
-            for (i = 0; i < App.products.length; i++) {
-                App._renderProduct(App.products[i]);
-            }
+                for (i = 0; i < App.products.length; i++) {
+                    App._renderProduct(App.products[i]);
+                }
             });
         });
-
-        // Show products container
-        $('#products-container').show();
 
         // Init Slick.js
         App.slider = $('#products-container');
@@ -147,7 +120,7 @@ App._initializeDashboard = function() {
             nextArrow: $('#next-product'),
             prevArrow: $('#prev-product')
         });
-            
+
         //Monitor swipe position and add products
         App.slider.on('afterChange', function(event, slick, currentSlide) {
             App._extendProducts(slick, currentSlide);
@@ -168,8 +141,6 @@ App._initializeDashboard = function() {
  */
 
 App._initializeServant = function(servantID) {
-    // Change greeting to "loading" while we change servants
-    $('#greeting').text('Loading...');
 
     // Find servant with this ID and set it as the App's default servant
     for (i = 0; i < App.servants.length; i++) {
@@ -195,9 +166,9 @@ App._initializeServant = function(servantID) {
             for (i = 0; i < App.products.length; i++) {
                 App._renderProduct(App.products[i]);
             }
-            
+
         }
-    }); 
+    });
 };
 
 
@@ -221,7 +192,7 @@ App._loadProducts = function(callback) {
         // Save data to global app variable
         App.products = response.records;
         App.totalProducts = response.meta.count;
-        console.log(response);
+        console.log("Products Loaded: ", response);
         // Increment page number in our query criteria.  Next time we call the function, the next page will be fetched.
         App.criteria.page++;
 
@@ -242,7 +213,7 @@ App._renderProduct = function(product) {
     var html = '<div class="product">';
     if (product.images.length) html = html + '<img class="image" src="' + product.images[0].resolution_medium + '">';
     html = html + '<p class="name">' + product.name + '</p>';
-    html = html + '<p class="price">$' + product.price/100 + '</p>';
+    html = html + '<p class="price">$' + product.price / 100 + '</p>';
     html = html + '</div>';
 
     // Append to products inside of slider
@@ -251,63 +222,63 @@ App._renderProduct = function(product) {
 };
 
 /**
-* Add More Products
-* - Determines distance from end of carousel and adds more products
-*/
+ * Add More Products
+ * - Determines distance from end of carousel and adds more products
+ */
 
 App._extendProducts = function(slick, currentSlide) {
-        
-        var detectThreshold = slick.slideCount - slick.currentSlide;
-        var slideDirection = slick.currentSlide - App.swipe.oldIndex;
-        var numPages = Math.ceil(App.totalProducts/10);
-        
-        //Determine swipe direction and record position relative to origin
-        if (slideDirection > 0) App.swipe.swipeCount++;
-        else if (slideDirection < 0) App.swipe.swipeCount--;
 
-        //Reset position relative to origin if origin is visited
-        if (slick.currentSlide === 0) App.swipe.swipeCount = 0;        
-        
-        //Stop additional product requests when page limit exceeded
-        if (App.swipe.recordsEnd > numPages-1) return false;
-console.log("");
-console.log("threshold", detectThreshold);
-console.log("direction", slideDirection);
-console.log("count", App.swipe.swipeCount);
-console.log("total_slides", slick.slideCount);
-console.log("recordsEnd", App.swipe.recordsEnd);
-        //Render next page of products if criteria met
-        if (detectThreshold === 3 && slideDirection > 0 && App.swipe.swipeCount === slick.slideCount - 3)  App._loadProducts(function(){
+    var detectThreshold = slick.slideCount - slick.currentSlide;
+    var slideDirection = slick.currentSlide - App.swipe.oldIndex;
+    var numPages = Math.ceil(App.totalProducts / 10);
 
-            App.swipe.oldIndex = slick.currentSlide;
-            App.swipe.recordsEnd++;
+    //Determine swipe direction and record position relative to origin
+    if (slideDirection > 0) App.swipe.swipeCount++;
+    else if (slideDirection < 0) App.swipe.swipeCount--;
 
-            for (i = 0; i < App.products.length; i++) {
-                App._renderProduct(App.products[i]);
-            }
+    //Reset position relative to origin if origin is visited
+    if (slick.currentSlide === 0) App.swipe.swipeCount = 0;
 
-        });
+    //Stop additional product requests when page limit exceeded
+    if (App.swipe.recordsEnd > numPages - 1) return false;
+    console.log("");
+    console.log("threshold", detectThreshold);
+    console.log("direction", slideDirection);
+    console.log("count", App.swipe.swipeCount);
+    console.log("total_slides", slick.slideCount);
+    console.log("recordsEnd", App.swipe.recordsEnd);
+    //Render next page of products if criteria met
+    if (detectThreshold === 3 && slideDirection > 0 && App.swipe.swipeCount === slick.slideCount - 3) App._loadProducts(function() {
 
-        else App.swipe.oldIndex = slick.currentSlide;
+        App.swipe.oldIndex = slick.currentSlide;
+        App.swipe.recordsEnd++;
+
+        for (i = 0; i < App.products.length; i++) {
+            App._renderProduct(App.products[i]);
+        }
+
+    });
+
+    else App.swipe.oldIndex = slick.currentSlide;
 };
 
 App._search = function(searchParam) {
-    
-    if (searchParam == "") App.criteria.query = {};  
-    else App.criteria.query.$text = {$search: searchParam}; 
-    
-    // Clear products from screen, we're going to reload them from the new servant...
-    App.slider.slick('slickRemove', null, null, true);
-    
-    // Set query criteria page back to 1
-    App.criteria.page = 1;
 
-    App._loadProducts(function(){
+    if (searchParam == "") App.criteria.query = {};
+    else App.criteria = {
+        query: {
+            $text: {
+                $search: searchParam
+            }
+        },
+        page: 1
+    };
+    // Populate Search Results Table
+    App._loadProducts(function() {
         for (i = 0; i < App.products.length; i++) {
-            $('#search-select').append('<option value="' + i + '">' + App.products[i].name + '</option>');
-            //$('#search-results').append('<li id="result' + i + '">' + App.products[i].name + '</li>');
-            App._renderProduct(App.products[i]);
-        } 
+            $('#showcase-search-results tbody').append('<tr><td>' + App.products[i].name + '</td></tr>');
+        }
+        $('#showcase-search-results').show();
     });
 };
 
@@ -326,4 +297,3 @@ App._search = function(searchParam) {
 
 
        });*/
-
