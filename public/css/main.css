@@ -211,12 +211,34 @@ textarea {
 }
 
 .search-image {
-    width: 40px;
+    width: 20px;
     height: auto;
+}
+
+.product-link:hover{
+    cursor: pointer;
 }
 
 tr td {
     padding: 5px;
+}
+
+tbody {
+    background: #ffffff;
+}
+
+tbody tr:last-child td:first-child {
+    border: #ffffff 1px;
+    border-radius: 0 0 0 0.6em;
+}
+
+tbody tr:last-child td:last-child {
+    border: #ffffff 1px;
+    border-radius: 0 0 0.6em 0;
+}
+
+tr:hover {
+    background: #D3D3D3;
 }
 
 #next-product {
