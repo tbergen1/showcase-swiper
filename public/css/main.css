@@ -210,6 +210,15 @@ textarea {
     margin: 15px;
 }
 
+.search-image {
+    width: 40px;
+    height: auto;
+}
+
+tr td {
+    padding: 5px;
+}
+
 #next-product {
     position: absolute;
     top: 40%;

@@ -101,6 +101,12 @@ App._initializeDashboard = function() {
 
         });
 
+        //Listen for search result selection
+        $('.product-link').click(function(event) {
+            console.log(event); 
+            App._selectProduct($(event.currentTarget).attr('data-productID')); 
+        });
+
         //Clear search
         $('#clear-search').click(function() {
             $('#search-box').val("");
@@ -119,6 +125,12 @@ App._initializeDashboard = function() {
         App.slider.slick({
             nextArrow: $('#next-product'),
             prevArrow: $('#prev-product')
+        });
+
+        App.innerSlider = $('.variation-container');
+        App.innerSlider.slick({
+            dots: true,
+            fade: true
         });
 
         //Monitor swipe position and add products
@@ -240,18 +252,12 @@ App._extendProducts = function(slick, currentSlide) {
     if (slick.currentSlide === 0) App.swipe.swipeCount = 0;
 
     //Stop additional product requests when page limit exceeded
-    if (App.swipe.recordsEnd > numPages - 1) return false;
-    console.log("");
-    console.log("threshold", detectThreshold);
-    console.log("direction", slideDirection);
-    console.log("count", App.swipe.swipeCount);
-    console.log("total_slides", slick.slideCount);
-    console.log("recordsEnd", App.swipe.recordsEnd);
+    if (App.criteria.page > numPages) return false;
+ 
     //Render next page of products if criteria met
     if (detectThreshold === 3 && slideDirection > 0 && App.swipe.swipeCount === slick.slideCount - 3) App._loadProducts(function() {
 
         App.swipe.oldIndex = slick.currentSlide;
-        App.swipe.recordsEnd++;
 
         for (i = 0; i < App.products.length; i++) {
             App._renderProduct(App.products[i]);
@@ -276,18 +282,27 @@ App._search = function(searchParam) {
     // Populate Search Results Table
     App._loadProducts(function() {
         for (i = 0; i < App.products.length; i++) {
-            $('#showcase-search-results tbody').append('<tr><td>' + App.products[i].name + '</td></tr>');
+            $('#showcase-search-results tbody').append('<tr><td><img class="product-link" data-productID="' + App.products[i]._id + '" src="' + App.products[i].images[0].resolution_thumbnail + '"></td><td><p class="product-link" data-productID="' + App.products[i]._id + '">' + App.products[i].name + '</p></td></tr>');
+            $('#search-select').append('<option value="' + i + '">' + App.products[i].name + '</option>');
         }
-        $('#showcase-search-results').show();
+        $('#showcase-search-results, #search-select-container').show();
     });
 };
 
+App._selectProduct = function(productID) {
+    
+    App.slider.slick('slickRemove', null, null, true);
+    
+    for (i = 0; i < App.products.length; i++) {
+        
+        if (productID === App.products[i]._id) App._renderProduct(App.products[i]);
+    }
+};
 // End
-
 
 /*$( "#target" ).keyup(function() {
  
-         // Show searching text to let user know searching is     happening automatically when they type
+         // Show searching text to let user know searching is happening automatically when they type
 
          if (search_timer) clearTimeout(search_timer);
 
