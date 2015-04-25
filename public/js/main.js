@@ -84,7 +84,6 @@ App._initializeDashboard = function() {
 
         // Populate the Servant Select field with each Servant
         for (i = 0; i < App.servants.length; i++) {
-            //$('#servant-select').append('<option value="' + App.servants[i]._id + '">' + App.servants[i].master + '</option>');
             $('#table-content tbody').append('<tr class="servant-row"><td class="servant-image"><img class="servant-link search-image" data-servantID="' + App.servants[i]._id + '" src="' + App.servants[i].servant_image + '"></td><td class="master-name"><p class="servant-link" data-servantID="' + App.servants[i]._id + '">' + App.servants[i].master + '</p></td></tr>');
         };
 
@@ -105,21 +104,10 @@ App._initializeDashboard = function() {
             });
         });
 
-
-
-
-         /*   if ($this.hasClass('hide')) {
-                $this.animate( {height: "200px"}, 'slow').removeClass('hide');
-                $('#test-table').show();
-            } else {
-                $this.animate( {height: "65px"}, 'slow').addClass('hide');
-                $('#test-table').hide();
-            }
-        });*/
-
         //Listen for key-up event in search field
         $('#search-box').keyup(function(event) {
-            console.log(event);
+            if($('#search-box').val() === "") return false;
+
             if (App.timer.search !== null) clearTimeout(App.timer.search);
 
             App.timer.search = setTimeout(function() {
@@ -164,8 +152,6 @@ App._initializeDashboard = function() {
     });
 };
 
-
-
 /**
  * Initialize Servant
  * - Changes the default servant in the app
@@ -203,9 +189,6 @@ App._initializeServant = function(servantID) {
         }
     });
 };
-
-
-
 
 /**
  * Load Products
@@ -289,6 +272,12 @@ App._extendProducts = function(slick, currentSlide) {
     else App.swipe.oldIndex = slick.currentSlide;
 };
 
+/**
+ * Search for Products
+ * - Fetches and displays search results
+ * - Clears previous search results if they exist
+ */
+
 App._search = function(searchParam) {
 
     if (searchParam == "") App.criteria.query = {};
@@ -300,20 +289,25 @@ App._search = function(searchParam) {
         },
         page: 1
     };
+    //Remove existing search results
+    if ($('.search-row').length) $('.search-row').remove();
     // Populate Search Results Table
     App._loadProducts(function() {
         for (i = 0; i < App.products.length; i++) {
-            $('#showcase-search-results tbody').append('<tr><td><img class="product-link search-image" data-productID="' + App.products[i]._id + '" src="' + App.products[i].images[0].resolution_thumbnail + '"></td><td><p class="product-link" data-productID="' + App.products[i]._id + '">' + App.products[i].name + '</p></td></tr>');
+            $('#showcase-search-results tbody').append('<tr class="search-row"><td class="result-data"><img class="product-link search-image" data-productID="' + App.products[i]._id + '" src="' + App.products[i].images[0].resolution_thumbnail + '"></td><td class="result-data"><p class="product-link" data-productID="' + App.products[i]._id + '">' + App.products[i].name + '</p></td></tr>');
         }
-        $('#showcase-search-results').show();
-
+        $('#showcase-search-results').fadeIn('slow');
         //Listen for search result selection
         $('.product-link').click(function(event) {
-            console.log(event.currentTarget); 
             App._selectProduct($(event.currentTarget).attr('data-productID')); 
         });
     });
 };
+
+/**
+ * Select Products
+ * - Clears previous results from slider and displays selected product
+ */
 
 App._selectProduct = function(productID) {
     

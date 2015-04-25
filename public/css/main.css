@@ -161,7 +161,6 @@ textarea {
 }
 
 #options {
-    
     width: 15.625em;
     border-top: inset #F0F0F0 1px;
     padding: 1em;
@@ -169,7 +168,6 @@ textarea {
 
 
 #log-out {
-    
     width: 15.625em;
     border-top: inset #F0F0F0 1px;
     border-bottom: inset #F0F0F0 1px;
@@ -285,32 +283,32 @@ textarea {
     background: #D3D3D3;
 }
 
-/*tr {
+.search-row {
     padding: 5px;
 }
 
-td {
+.result-data {
     width: 300px;
     padding: 5px;
 }
 
-tbody {
+.showcase-results {
     background: #ffffff;
 }
 
-tbody tr:last-child td:first-child {
+.search-row:last-child .result-data:first-child {
     border: #ffffff 1px;
     border-radius: 0 0 0 0.6em;
 }
 
-tbody tr:last-child td:last-child {
+.search-row:last-child .result-data:last-child {
     border: #ffffff 1px;
     border-radius: 0 0 0.6em 0;
 }
 
-tr:hover {
+.search-row:hover {
     background: #D3D3D3;
-}*/
+}
 
 #next-product {
     position: absolute;
