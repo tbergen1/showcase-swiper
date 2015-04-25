@@ -242,14 +242,22 @@ textarea {
     padding: 5px;
 }
 
+.clear {
+    position: relative;
+    margin-left: 430px;
+    margin-top: 5px;
+    z-index: 1000;
+}
+
 #showcase-slider-container {
     position: relative;
     padding-top: 25px;
 }
 
 #showcase-search-results {
-    position: relative;
+    position: absolute;  /*relative to push content down*/
     margin: 15px;
+    z-index: 1000;
 }
 
 .search-image {

@@ -18,6 +18,9 @@ if (!window.App) window.App = App = {
     },
     animation: {
         inProgress: false
+    },
+    search: {
+        results: [];
     }
 };
 
@@ -81,10 +84,7 @@ App._initializeDashboard = function() {
         // Save data to global app variable
         App.user = response.user;
         App.servants = response.servants;
-
-        console.log("user", App.user);
-        console.log("servants", App.servants);
-
+       
         // Populate the Servant Select field with each Servant
         for (i = 0; i < App.servants.length; i++) {
             $('#table-content tbody').append('<tr class="servant-row"><td class="servant-image"><img class="servant-link search-image" data-servantID="' + App.servants[i]._id + '" src="' + App.servants[i].servant_image + '"></td><td class="master-name"><p class="servant-link" data-servantID="' + App.servants[i]._id + '">' + App.servants[i].master + '</p></td></tr>');
@@ -116,16 +116,23 @@ App._initializeDashboard = function() {
             if (App.timer.search !== null) clearTimeout(App.timer.search);
 
             App.timer.search = setTimeout(function() {
+                $('.clear').show("slow");
                 App._search($('#search-box').val())
             }, 700);
 
         });
 
         //Clear search
-        $('#clear-search').click(function() {
+        $('.clear').click(function() {
             $('#search-box').val("");
-            App.criteria.query = {};
-            App.criteria.page = 1;
+            App.criteria = {
+                query: {},
+                sort: {},
+                page: 1
+            };
+            App.swipe.oldIndex = 0;
+            $('.search-row').html("");
+            $('.clear').hide();
             App.slider.slick('slickRemove', null, null, true);
             App._loadProducts(function() {
                 for (i = 0; i < App.products.length; i++) {
@@ -176,7 +183,7 @@ App._initializeServant = function(servantID) {
 
     // Set query criteria page back to 1
     App.criteria.page = 1;
-
+    App.swipe.oldIndex = 0;
     // Reload products
     App._loadProducts(function() {
 
@@ -213,7 +220,7 @@ App._loadProducts = function(callback) {
         // Save data to global app variable
         App.products = response.records;
         App.totalProducts = response.meta.count;
-        console.log("Products Loaded: ", response);
+
         // Increment page number in our query criteria.  Next time we call the function, the next page will be fetched.
         App.criteria.page++;
 
@@ -292,16 +299,18 @@ App._search = function(searchParam) {
                 $search: searchParam
             }
         },
+        sort: {},
         page: 1
     };
     //Remove existing search results
-    if ($('.search-row').length) $('.search-row').remove();
+    if ($('.search-row').length) $('.search-row').html("");
     // Populate Search Results Table
     App._loadProducts(function() {
         for (i = 0; i < App.products.length; i++) {
             $('#showcase-search-results tbody').append('<tr class="search-row"><td class="result-data"><img class="product-link search-image" data-productID="' + App.products[i]._id + '" src="' + App.products[i].images[0].resolution_thumbnail + '"></td><td class="result-data"><p class="product-link" data-productID="' + App.products[i]._id + '">' + App.products[i].name + '</p></td></tr>');
         }
         $('#showcase-search-results').fadeIn('slow');
+
         //Listen for search result selection
         $('.product-link').click(function(event) {
             App._selectProduct($(event.currentTarget).attr('data-productID')); 
