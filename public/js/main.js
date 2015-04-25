@@ -79,20 +79,44 @@ App._initializeDashboard = function() {
         App.user = response.user;
         App.servants = response.servants;
 
+        console.log("user", App.user);
+        console.log("servants", App.servants);
+
         // Populate the Servant Select field with each Servant
         for (i = 0; i < App.servants.length; i++) {
-            $('#servant-select').append('<option value="' + App.servants[i]._id + '">' + App.servants[i].master + '</option>');
+            //$('#servant-select').append('<option value="' + App.servants[i]._id + '">' + App.servants[i].master + '</option>');
+            $('#table-content tbody').append('<tr class="servant-row"><td class="servant-image"><img class="servant-link search-image" data-servantID="' + App.servants[i]._id + '" src="' + App.servants[i].servant_image + '"></td><td class="master-name"><p class="servant-link" data-servantID="' + App.servants[i]._id + '">' + App.servants[i].master + '</p></td></tr>');
         };
 
-        // Set listener on the select field to change servant in application and reload products
-        $('#servant-select').change(function() {
+        $('.servant-link').click(function(event) {
             App.criteria.query = {};
-            return App._initializeServant($("#servant-select option:selected").val());
+            return App._initializeServant($(event.currentTarget).attr('data-servantID')); 
         });
 
-        //Listen for key-up event in search field
-        $('#search-box').keyup(function() {
+        //Menu Option Expansion
+        $('#settings').click(function() {
+            $menuButton = $(this);
+            $content = $menuButton.next();
 
+            $content.slideToggle(500);
+
+            });
+
+
+
+
+         /*   if ($this.hasClass('hide')) {
+                $this.animate( {height: "200px"}, 'slow').removeClass('hide');
+                $('#test-table').show();
+            } else {
+                $this.animate( {height: "65px"}, 'slow').addClass('hide');
+                $('#test-table').hide();
+            }
+        });*/
+
+        //Listen for key-up event in search field
+        $('#search-box').keyup(function(event) {
+            console.log(event);
             if (App.timer.search !== null) clearTimeout(App.timer.search);
 
             App.timer.search = setTimeout(function() {
@@ -297,6 +321,7 @@ App._selectProduct = function(productID) {
         if (productID === App.products[i]._id) App._renderProduct(App.products[i]);
     }
 };
+
 // End
 
 /*$( "#target" ).keyup(function() {
@@ -311,3 +336,16 @@ App._selectProduct = function(productID) {
 
 
        });*/
+
+
+/*$('#search-box').keydown(function(event) {
+
+    if (event.keyCode === 13) App._search($('#search-box').val());
+    
+    if (App.timer.search !== null) clearTimeout(App.timer.search);
+
+            App.timer.search = setTimeout(function() {
+                App._search($('#search-box').val())
+            }, 700);
+
+        });*/

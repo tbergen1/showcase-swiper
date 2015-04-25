@@ -123,8 +123,14 @@ textarea {
     border: none!important;
 }
 
+#logo {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 #servant-select-container {
-    position: absolute;
+    position: relative;
     top: 20px;
     left: 0px;
     right: 0px;
@@ -134,6 +140,29 @@ textarea {
 
 #servant-select {
     font-size: 13px;
+}
+
+.container #settings {
+    width: 15.625em;
+    border-top: inset #F0F0F0 1px;
+    padding: 1em;
+}
+
+.container .content {
+   display: none;
+   padding: 5px;
+}
+
+#log-out {
+    
+    width: 15.625em;
+    border-top: inset #F0F0F0 1px;
+    border-bottom: inset #F0F0F0 1px;
+    padding: 1em;
+}
+
+.menu-button:hover {
+    background: #D3D3D3;
 }
 /* Main Page */
 
@@ -219,7 +248,27 @@ textarea {
     cursor: pointer;
 }
 
-tr td {
+/*Servant Select Styling*/
+
+.servant-image {
+    padding: 0px 20px 5px 3px;
+}
+
+.master-name {
+    width: 200px;
+    text-align: left;
+}
+
+.servant-row:hover {
+    background: #D3D3D3;
+}
+
+/*tr {
+    padding: 5px;
+}
+
+td {
+    width: 300px;
     padding: 5px;
 }
 
@@ -239,7 +288,7 @@ tbody tr:last-child td:last-child {
 
 tr:hover {
     background: #D3D3D3;
-}
+}*/
 
 #next-product {
     position: absolute;
