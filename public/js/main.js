@@ -94,13 +94,16 @@ App._initializeDashboard = function() {
         });
 
         //Menu Option Expansion
-        $('#settings').click(function() {
+        $('#servants').click(function() {
             $menuButton = $(this);
             $content = $menuButton.next();
 
-            $content.slideToggle(500);
+            $content.slideToggle(500, function() {
 
+                $('#servant-down').find('i').toggleClass('fa-chevron-circle-down fa-chevron-circle-up');
+               
             });
+        });
 
 
 

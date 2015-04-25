@@ -44,12 +44,12 @@
 
         <!-- Showcase Page Side Menu -->
         <div id="menu" class="panel" role="navigation">
-            <div>
-            <img id="logo" src="/img/showcase_logo.png">
+            <div id="logo-container">
+                <img id="logo" src="/img/showcase_logo.png">
             </div>
             <div class="container">
-                <div id="settings" class="menu-button">
-                    <p>Servants</p>
+                <div id="servants" class="menu-button">
+                    <table><tr><td><p id="servant-menu">Servants</p></td><td id="servant-down"><i class="fa fa-chevron-circle-down fa-1"></i></td></tr></table>
                 </div>
                 <div class="content">
                     <table id="table-content">
@@ -57,6 +57,10 @@
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div id="options" class="menu-button">
+                <p>Options</p>
             </div>
 
             <div id="log-out" class="menu-button">

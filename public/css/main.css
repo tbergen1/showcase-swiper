@@ -127,6 +127,13 @@ textarea {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    height: -50%;
+    width: -50%;
+}
+
+#logo-container {
+    width: 15.625em;
+    padding: 1em;
 }
 
 #servant-select-container {
@@ -142,7 +149,7 @@ textarea {
     font-size: 13px;
 }
 
-.container #settings {
+.container #servants {
     width: 15.625em;
     border-top: inset #F0F0F0 1px;
     padding: 1em;
@@ -152,6 +159,14 @@ textarea {
    display: none;
    padding: 5px;
 }
+
+#options {
+    
+    width: 15.625em;
+    border-top: inset #F0F0F0 1px;
+    padding: 1em;
+}
+
 
 #log-out {
     
@@ -249,6 +264,13 @@ textarea {
 }
 
 /*Servant Select Styling*/
+#servant-menu {
+    padding: 0px 140px 0px 0px ;
+}
+
+#servant-down {
+    vertical-align: text-top ;
+}
 
 .servant-image {
     padding: 0px 20px 5px 3px;
