@@ -15,6 +15,9 @@ if (!window.App) window.App = App = {
         oldIndex: 0,
         swipeCount: 0,
         recordsEnd: 1
+    },
+    animation: {
+        inProgress: false
     }
 };
 
@@ -91,16 +94,18 @@ App._initializeDashboard = function() {
             App.criteria.query = {};
             return App._initializeServant($(event.currentTarget).attr('data-servantID')); 
         });
-
+        
         //Menu Option Expansion
         $('#servants').click(function() {
+            if(App.animation.inProgress) return false;
+            App.animation.inProgress = true;
             $menuButton = $(this);
             $content = $menuButton.next();
 
             $content.slideToggle(500, function() {
 
                 $('#servant-down').find('i').toggleClass('fa-chevron-circle-down fa-chevron-circle-up');
-               
+                App.animation.inProgress = false;
             });
         });
 

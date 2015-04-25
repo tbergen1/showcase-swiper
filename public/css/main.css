@@ -281,6 +281,7 @@ textarea {
 
 .servant-row:hover {
     background: #D3D3D3;
+    cursor: pointer;
 }
 
 .search-row {
