@@ -14,13 +14,12 @@ if (!window.App) window.App = App = {
     swipe: {
         oldIndex: 0,
         swipeCount: 0,
-        recordsEnd: 1
     },
     animation: {
         inProgress: false
     },
-    search: {
-        results: [];
+    storage: {
+        results: []
     }
 };
 
@@ -111,12 +110,19 @@ App._initializeDashboard = function() {
 
         //Listen for key-up event in search field
         $('#search-box').keyup(function(event) {
+
+            if(!App.animation.inProgress) {
+                $('.loading').show();
+                App.animation.inProgress = true;
+            }
             if($('#search-box').val() === "") return false;
 
             if (App.timer.search !== null) clearTimeout(App.timer.search);
 
             App.timer.search = setTimeout(function() {
-                $('.clear').show("slow");
+                App.animation.inProgress = false;
+                $('.loading').hide();
+                $('.clear').show();
                 App._search($('#search-box').val())
             }, 700);
 
@@ -133,6 +139,7 @@ App._initializeDashboard = function() {
             App.swipe.oldIndex = 0;
             $('.search-row').html("");
             $('.clear').hide();
+            $('#next-product, #prev-product').show();
             App.slider.slick('slickRemove', null, null, true);
             App._loadProducts(function() {
                 for (i = 0; i < App.products.length; i++) {
@@ -148,15 +155,46 @@ App._initializeDashboard = function() {
             prevArrow: $('#prev-product')
         });
 
-        App.innerSlider = $('.variation-container');
-        App.innerSlider.slick({
-            dots: true,
-            fade: true
-        });
-
         //Monitor swipe position and add products
         App.slider.on('afterChange', function(event, slick, currentSlide) {
+            if ($('.variation-container').length) {
+                console.log("executed");
+                for(i = 1; i < App.products[currentSlide - 1].images.length - 1; i++) {
+                    App.innerSlider.slick('slickRemove', null, false, null);
+                }
+            $('[data-imageID="' + App.products[currentSlide - 1].images[0]._id + '"]').unwrap();
+            console.log("unwrapped");
+            }
             App._extendProducts(slick, currentSlide);
+        });
+        
+        //Alt Images Button
+        $('#render-alt-images').click(function() {
+            App.innerSlider = $('.variation-container');
+            App.innerSlider.slick({
+            autoplay: false,
+            arrows: false,
+            draggable: false,
+            //asNavFor: '.slider-nav';
+            });
+
+        $('.slider-nav').slick({
+            slidesToShow: 3,
+            slidesToScroll: 1,
+            asNavFor: App.innerSlider,
+            dots: false,
+            centerMode: true,
+            focusOnSelect: true
+            });
+
+            // Render multiple images
+            for (i = 1; i < App.products[0].images.length; i++) {
+                App._renderAltImages(App.products[0].images[i]);
+            }
+
+            for (i = 0; i < App.products[0].images.length; i++) {
+                App._renderImages(App.products[0].images[i]);
+            }
         });
 
         // Pick first Servant as default and initialize
@@ -197,7 +235,8 @@ App._initializeServant = function(servantID) {
             for (i = 0; i < App.products.length; i++) {
                 App._renderProduct(App.products[i]);
             }
-
+        //Wrap first image in slick wrapper based on image ID
+        $('[data-imageID="' + App.products[0].images[0]._id + '"]').wrap('<div class="variation-container"></div>');
         }
     });
 };
@@ -220,7 +259,7 @@ App._loadProducts = function(callback) {
         // Save data to global app variable
         App.products = response.records;
         App.totalProducts = response.meta.count;
-
+        console.log("Products Loaded:", App.products);
         // Increment page number in our query criteria.  Next time we call the function, the next page will be fetched.
         App.criteria.page++;
 
@@ -239,7 +278,7 @@ App._renderProduct = function(product) {
 
     // Create a string of the contact's html
     var html = '<div class="product">';
-    if (product.images.length) html = html + '<img class="image" src="' + product.images[0].resolution_medium + '">';
+    if (product.images.length) html = html + '<img class="image" data-imageID="' + product.images[0]._id + '" src="' + product.images[0].resolution_medium + '">';
     html = html + '<p class="name">' + product.name + '</p>';
     html = html + '<p class="price">$' + product.price / 100 + '</p>';
     html = html + '</div>';
@@ -309,7 +348,7 @@ App._search = function(searchParam) {
         for (i = 0; i < App.products.length; i++) {
             $('#showcase-search-results tbody').append('<tr class="search-row"><td class="result-data"><img class="product-link search-image" data-productID="' + App.products[i]._id + '" src="' + App.products[i].images[0].resolution_thumbnail + '"></td><td class="result-data"><p class="product-link" data-productID="' + App.products[i]._id + '">' + App.products[i].name + '</p></td></tr>');
         }
-        $('#showcase-search-results').fadeIn('slow');
+        $('#showcase-search-results').show();
 
         //Listen for search result selection
         $('.product-link').click(function(event) {
@@ -331,7 +370,25 @@ App._selectProduct = function(productID) {
         
         if (productID === App.products[i]._id) App._renderProduct(App.products[i]);
     }
+    $('#showcase-search-results, #next-product, #prev-product').hide();
 };
+
+App._renderAltImages = function(product) {
+    console.log("Successful Pass", product);
+    var html = '<img class="image" src="' + product.resolution_medium + '"></div>';
+    console.log("image response", product);
+    // Append to products inside of alt-image slider
+    App.innerSlider.slick('slickAdd', html);
+
+};
+
+App._renderImages = function(product) {
+    console.log("called");
+    var html2 = '<img class="image" src="' + product.resolution_medium + '"></div>';
+
+    $('.slider-nav').slick('slickAdd', html2);
+}
+
 
 // End
 
@@ -360,3 +417,4 @@ App._selectProduct = function(productID) {
             }, 700);
 
         });*/
+
