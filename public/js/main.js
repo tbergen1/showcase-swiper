@@ -14,12 +14,13 @@ if (!window.App) window.App = App = {
     swipe: {
         oldIndex: 0,
         swipeCount: 0,
+        currentPosition: 0
     },
     animation: {
         inProgress: false
     },
     storage: {
-        results: []
+        products: []
     }
 };
 
@@ -112,6 +113,7 @@ App._initializeDashboard = function() {
         $('#search-box').keyup(function(event) {
 
             if(!App.animation.inProgress) {
+                $('#showcase-slider-container').animate({opacity: '0.1'}, "fast");
                 $('.loading').show();
                 App.animation.inProgress = true;
             }
@@ -127,6 +129,11 @@ App._initializeDashboard = function() {
             }, 700);
 
         });
+
+        //Close modal pop-up on background interaction
+        /*$('#modal-background').click(function() {
+            App._closeModal();
+        });*/
 
         //Clear search
         $('.clear').click(function() {
@@ -157,45 +164,28 @@ App._initializeDashboard = function() {
 
         //Monitor swipe position and add products
         App.slider.on('afterChange', function(event, slick, currentSlide) {
-            if ($('.variation-container').length) {
-                console.log("executed");
-                for(i = 1; i < App.products[currentSlide - 1].images.length - 1; i++) {
-                    App.innerSlider.slick('slickRemove', null, false, null);
-                }
-            $('[data-imageID="' + App.products[currentSlide - 1].images[0]._id + '"]').unwrap();
-            console.log("unwrapped");
-            }
+            App.swipe.currentPosition = currentSlide;
             App._extendProducts(slick, currentSlide);
         });
         
         //Alt Images Button
-        $('#render-alt-images').click(function() {
-            App.innerSlider = $('.variation-container');
-            App.innerSlider.slick({
-            autoplay: false,
+        App.altSlider = $('.variation-container');
+        App.altSlider.slick({
+            slidesToShow: 1,
+            slidesToScroll: 1,
             arrows: false,
-            draggable: false,
-            //asNavFor: '.slider-nav';
+            asNavFor: '.variation-nav'
             });
 
-        $('.slider-nav').slick({
+        App.navSlider = $('.variation-nav')
+        App.navSlider.slick({
             slidesToShow: 3,
             slidesToScroll: 1,
-            asNavFor: App.innerSlider,
             dots: false,
             centerMode: true,
-            focusOnSelect: true
+            focusOnSelect: true,
+            asNavFor: 'variation-container'
             });
-
-            // Render multiple images
-            for (i = 1; i < App.products[0].images.length; i++) {
-                App._renderAltImages(App.products[0].images[i]);
-            }
-
-            for (i = 0; i < App.products[0].images.length; i++) {
-                App._renderImages(App.products[0].images[i]);
-            }
-        });
 
         // Pick first Servant as default and initialize
         return App._initializeServant(App.servants[0]._id);
@@ -235,9 +225,20 @@ App._initializeServant = function(servantID) {
             for (i = 0; i < App.products.length; i++) {
                 App._renderProduct(App.products[i]);
             }
-        //Wrap first image in slick wrapper based on image ID
-        $('[data-imageID="' + App.products[0].images[0]._id + '"]').wrap('<div class="variation-container"></div>');
         }
+        $('.image').click(function(event) {
+            console.log('execute');
+            for(i = 0; i < App.storage.products.length; i++) {
+                if($(event.currentTarget).attr('data-imageID') === App.storage.products[i].images[0]._id) {
+                    for(j = 0; j < App.storage.products[i].images.length; j++) {
+                        App._renderAltImages(App.storage.products[i].images[j]);
+                        App._renderNavImages(App.storage.products[i].images[j]);
+                    }
+                }
+            }
+
+            App._showModal();
+        });
     });
 };
 
@@ -258,8 +259,10 @@ App._loadProducts = function(callback) {
 
         // Save data to global app variable
         App.products = response.records;
+        App.storage.products = App.storage.products.concat(response.records);
         App.totalProducts = response.meta.count;
         console.log("Products Loaded:", App.products);
+        console.log("Products Storage Result", App.storage.products);
         // Increment page number in our query criteria.  Next time we call the function, the next page will be fetched.
         App.criteria.page++;
 
@@ -373,21 +376,40 @@ App._selectProduct = function(productID) {
     $('#showcase-search-results, #next-product, #prev-product').hide();
 };
 
-App._renderAltImages = function(product) {
-    console.log("Successful Pass", product);
-    var html = '<img class="image" src="' + product.resolution_medium + '"></div>';
-    console.log("image response", product);
-    // Append to products inside of alt-image slider
-    App.innerSlider.slick('slickAdd', html);
+App._showModal = function(productID) {
 
+    $('#modal-background').fadeIn(300);
 };
 
-App._renderImages = function(product) {
-    console.log("called");
-    var html2 = '<img class="image" src="' + product.resolution_medium + '"></div>';
+App._closeModal = function() {
+    $('#modal-background').fadeOut(300);
+};
 
-    $('.slider-nav').slick('slickAdd', html2);
+App._renderAltImages = function(altImages) {
+   
+    var html = '<div class="alt-product">';
+    html = html + '<img class="alt-image" src="' + altImages.resolution_medium + '"></div>';
+    html = html + '</div>';
+   
+    // Append to products inside of alt-image slider
+    App.altSlider.slick('slickAdd', html);
+};
+
+App._renderNavImages = function(navImages) {
+    var html = '<div class="nav-product">';
+    html = html + '<img class="alt-image" src="' + navImages.resolution_thumbnail + '"></div>';
+    html = html + '</div>';
+
+    App.navSlider.slick('slickAdd', html);
 }
+
+
+/*App._renderImages = function(product) {
+    console.log("called");
+    var html = '<img class="image" src="' + product.resolution_medium + '"></div>';
+
+    $('.slider-nav').slick('slickAdd', html);
+}*/
 
 
 // End

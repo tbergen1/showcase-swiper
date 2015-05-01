@@ -80,7 +80,6 @@
                 <!-- Search Area -->
                 <input id="search-box" type="text" class="" placeholder="&#xF002;" style="font-family:Arial, FontAwesome">
                 <p class="clear" style="display:none;"><i class="fa fa-times"></i></p>
-                <p class="loading" style="display:none;"><i class="fa fa-spinner fa-pulse"></i></p>
             </div>
         </div>
 
@@ -98,14 +97,20 @@
             <!-- Products Scroll Buttons -->
             <i id="next-product" class="fa fa-chevron-right link"></i>
             <i id="prev-product" class="fa fa-chevron-left link"></i>
+            <p class="loading" style="display:none;"><i class="fa fa-spinner fa-pulse"></i></p>
             <!-- Products Slider -->
             <div id="products-container" class="st-animate-bounce-in-up"></div>
         </div>
-        <div id="test-render">
-            <button id="render-alt-images" type="button">Add Alt Images</button>
+        
+        <!-- Modal -->
+        <div id="modal-background" style="display:none;">
+            <div id="modal">
+                <i class="fa fa-times modal-close-link" onclick="App._closeModal()"></i>
+            </div>
+            <div class="variation-container"></div>
+            <div class="variation-nav"></div>
         </div>
-        <div class="slider-nav"></div>
-        <!--<div class="variation-container"></div>-->
+
     </div>
 
     <!-- End Site Content -->
